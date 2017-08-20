@@ -24,4 +24,12 @@ public class MainController {
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @RequestMapping(value = "/subscribe", method = RequestMethod.GET)
+    public HttpEntity<Void> testReactiveSubscribe() {
+
+        mainService.testReactiveSubscribe();
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

@@ -1,5 +1,10 @@
 package com.learn.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.learn.service.MainService;
@@ -9,6 +14,9 @@ import rx.schedulers.Schedulers;
 
 @Service
 public class MainServiceImpl implements MainService {
+
+    @Autowired
+    private Executor threadPoolTaskExecutor;
 
     @Override
     public void testReactiveZip() {
@@ -21,28 +29,32 @@ public class MainServiceImpl implements MainService {
             return operation1Resp + ":" + operation2Resp;
         });
 
-        /*
-         * result.toList().forEach(str -> { System.out.println(str); });
-         */
-
         System.out.println("Result Received" + result.toBlocking().first());
     }
 
-    private Observable<String> testOperationAsync(final int value) {
+    @Override
+    public void testReactiveSubscribe() {
 
-        return Observable.create(observer -> {
+        final List<String> lst = new ArrayList<>();
+        for (int i = 0; i < 25; i++) {
+            lst.add("op " + i);
+        }
 
-            System.out.println("Operation " + value + " Started");
-            System.out.println("Operation " + value + " Thread: " + Thread.currentThread().getName());
-            System.out.println("Operation " + value + " Thread Sleeping");
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        System.out.println("Approach 1");
+        Observable.from(lst).subscribe(item -> {
 
-            observer.onNext("Operation " + value + " Completed");
-            observer.onCompleted();
+            final String threadName = Thread.currentThread().getName();
+            System.out.println(item + " on: " + threadName);
+        });
+
+        System.out.println("Approach 2");
+        Observable.from(lst).subscribe(item -> {
+
+            Observable.just(item).subscribeOn(Schedulers.from(threadPoolTaskExecutor)).subscribe(itemS -> {
+
+                final String threadName = Thread.currentThread().getName();
+                System.out.println(item + " on: " + threadName);
+            });
         });
     }
 
