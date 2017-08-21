@@ -1,5 +1,7 @@
 package com.learn.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -31,5 +33,13 @@ public class MainController {
         mainService.testReactiveSubscribe();
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/subscribe/v2", method = RequestMethod.GET)
+    public HttpEntity<List<Integer>> testReactiveSubscribe2() {
+
+        final List<Integer> valueList = mainService.testReactiveSubscribe2();
+
+        return new ResponseEntity<>(valueList, HttpStatus.OK);
     }
 }

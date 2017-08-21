@@ -58,6 +58,41 @@ public class MainServiceImpl implements MainService {
         });
     }
 
+    @Override
+    public List<Integer> testReactiveSubscribe2() {
+
+        final List<Integer> lst = new ArrayList<>();
+        for (int i = 0; i < 25; i++) {
+            lst.add(i);
+        }
+
+        final List<Integer> results = new ArrayList<>();
+
+        calculationObservable(lst).toBlocking().forEach(intValue -> {
+            results.add(intValue);
+        });
+
+        return results;
+    }
+
+    private Observable<Integer> calculationObservable(final List<Integer> intList) {
+
+        return Observable.create(observer -> {
+
+            Observable.from(intList).subscribe(intItem -> {
+
+                /*Observable.just(intItem).subscribeOn(Schedulers.from(threadPoolTaskExecutor)).subscribe(intItemS -> {
+
+                    observer.onNext((int) Math.pow(intItemS, 2));
+                });*/
+
+                observer.onNext((int) Math.pow(intItem, 2));
+            });
+
+            observer.onCompleted();
+        });
+    }
+
     private Observable<String> testOperation1() {
 
         return Observable.create(observer -> {
